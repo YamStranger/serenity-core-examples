@@ -1,0 +1,52 @@
+apply plugin: 'java'
+version = '1.0'
+libsDirName = 'lib'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+task "create-dirs" << {
+   sourceSets*.java.srcDirs*.each { it.mkdirs() }
+   sourceSets*.resources.srcDirs*.each { it.mkdirs() }
+}
+
+repositories {
+    mavenLocal()
+    jcenter()
+}
+
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+    }
+    dependencies {
+        classpath("net.serenity-bdd:serenity-gradle-plugin:1.0.47")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'net.serenity-bdd.aggregator'
+
+dependencies {
+    compile 'net.serenity-bdd:core:1.0.47'
+    compile 'net.serenity-bdd:serenity-junit:1.0.47'
+    compile('junit:junit:4.11')
+    compile('org.assertj:assertj-core:1.7.0')
+    compile('org.slf4j:slf4j-simple:1.7.7')
+    net.serenity-bdd » serenity-rest-assured » 1.1.21
+    
+}
+
+gradle.startParameter.continueOnFailure = true
+
+task copyDeps(type: Copy) {
+  from configurations.runtime
+  into project.projectDir.path+'/lib'
+}
+
+compileJava {
+	dependsOn ('copyDeps','create-dirs')
+}
+
