@@ -1,6 +1,8 @@
-apply plugin: 'java'
-version = '1.0'
-libsDirName = 'lib'
+import java.nio.file.Files
+
+apply plugin: "java"
+version = "1.0"
+libsDirName = "lib"
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
@@ -8,45 +10,89 @@ task "create-dirs" << {
    sourceSets*.java.srcDirs*.each { it.mkdirs() }
    sourceSets*.resources.srcDirs*.each { it.mkdirs() }
 }
-
+def pluginBuildDir = projectDir.toPath()
+def libDir = {
+    assert Files.exists(pluginBuildDir.resolve("libBuild")), "example project was moved, can't find libs directory"
+    String.valueOf(pluginBuildDir.resolve("libBuild").toAbsolutePath())
+}
 repositories {
     mavenLocal()
     jcenter()
+    flatDir(name: 'fileRepo', dirs: '/home/yamstranger/dev/src/serenity/128_issue/serenity-core-examples/libBuild')
 }
 
 buildscript {
     repositories {
         mavenLocal()
         jcenter()
+        flatDir(name: 'fileRepo', dirs: '/home/yamstranger/dev/src/serenity/128_issue/serenity-core-examples/libBuild')
     }
     dependencies {
-        classpath("net.serenity-bdd:serenity-gradle-plugin:1.0.47")
+        classpath("net.serenity-bdd:serenity-gradle-plugin:1.1.22-SNAPSHOT")
     }
 }
+ext{
+    serenity_version = "1.1.21"
+}
 
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'net.serenity-bdd.aggregator'
+apply plugin: "java"
+apply plugin: "eclipse"
+apply plugin: "idea"
+apply plugin: "net.serenity-bdd.aggregator"
+
 
 dependencies {
-    compile 'net.serenity-bdd:core:1.0.47'
-    compile 'net.serenity-bdd:serenity-junit:1.0.47'
-    compile('junit:junit:4.11')
-    compile('org.assertj:assertj-core:1.7.0')
-    compile('org.slf4j:slf4j-simple:1.7.7')
-    net.serenity-bdd » serenity-rest-assured » 1.1.21
-    
+    compile files('/home/yamstranger/dev/src/serenity/128_issue/serenity-core-examples/libBuild/serenity-rest-assured-1.1.22-SNAPSHOT.jar')
+//    compile fileTree('/home/yamstranger/dev/src/serenity/128_issue/serenity-core-examples/lib')
+    testRuntime files('/home/yamstranger/dev/src/serenity/128_issue/serenity-core-examples/libBuild/serenity-rest-assured-1.1.22-SNAPSHOT.jar')
+    testCompile files('/home/yamstranger/dev/src/serenity/128_issue/serenity-core-examples/libBuild/serenity-rest-assured-1.1.22-SNAPSHOT.jar')
+    compile "net.serenity-bdd:serenity-core:$serenity_version"
+    compile "net.serenity-bdd:serenity-junit:$serenity_version"
+/*    compile("junit:junit:4.11")
+    compile("org.assertj:assertj-core:1.7.0")
+    compile("org.slf4j:slf4j-simple:1.7.7")*/
+  //  compile("net.serenity-bdd:serenity-rest-assured:$serenity_version")
+    compile 'org.slf4j:slf4j-simple:1.7.12'
+    compile 'org.codehaus.groovy:groovy-all:2.3.10'
+    compile 'junit:junit:4.12'
+    compile 'com.googlecode.lambdaj:lambdaj:2.3.3'
+    compile 'org.assertj:assertj-core:3.1.0'
+    compile ("com.jayway.restassured:rest-assured:2.4.1") {
+        exclude group: 'org.apache.httpcomponents', module:'httpclient'
+        exclude group: 'org.apache.httpcomponents', module:'httpmime'
+        exclude group: 'org.codehaus.groovy', module:'groovy'
+        exclude group: 'org.codehaus.groovy', module:'groovy-json'
+        exclude group: 'org.codehaus.groovy', module:'groovy-xml'
+    }
+
 }
 
 gradle.startParameter.continueOnFailure = true
+test {
+    testLogging {
+        // Make sure output from
+        // standard out or error is shown
+        // in Gradle output.
+        showStandardStreams = true
 
+        // Or we use events method:
+        // events 'standard_out', 'standard_error'
+
+        // Or set property events:
+        // events = ['standard_out', 'standard_error']
+
+        // Instead of string values we can
+        // use enum values:
+        // events org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_OUT,
+        //        org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR,
+    }
+}
 task copyDeps(type: Copy) {
   from configurations.runtime
-  into project.projectDir.path+'/lib'
+  into project.projectDir.path+"/lib"
 }
 
-compileJava {
-	dependsOn ('copyDeps','create-dirs')
-}
+/*compileJava {
+	dependsOn ("copyDeps","create-dirs")
+}*/
 

@@ -1,4 +1,4 @@
-package issue;
+package serenity.issues;
 
 import net.thucydides.core.annotations.Step;
 

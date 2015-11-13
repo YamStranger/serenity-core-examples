@@ -1,4 +1,4 @@
-package issue;
+package serenity.issues;
 
 import net.serenitybdd.junit.runners.SerenityParameterizedRunner;
 import net.thucydides.core.annotations.Steps;
